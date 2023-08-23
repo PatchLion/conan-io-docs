@@ -11,6 +11,13 @@ already installed system-wide? In this case, you can declare this dependency in 
 using a type of requirement named ``tool_requires``. Let’s see an example of how to add a
 ``tool_requires`` to our project, and use a different CMake version to build it.
 
+在前面的示例中，我们构建了 CMake 项目，并使用 Conan 安装和定位 **Zlib** 库。Conan 使用系统路径中的 
+CMake 版本构建此示例。但是，如果在构建环境中没有安装 CMake，
+或者希望使用与系统范围内已经安装的版本不同的特定 CMake 版本来构建项目，
+那么会发生什么情况呢？在这种情况下，您可以使用一种名为 ``tool_requires`` 
+的需求类型在 Conan 中声明这种依赖关系。让我们看一个如何向我们的项目添加 
+``tool_requires`` 的示例，并使用不同的 CMake 版本来构建它。
+
 Please, first clone the sources to recreate this project. You can find them in the
 `examples2.0 repository <https://github.com/conan-io/examples2>`_ in GitHub:
 
@@ -33,6 +40,9 @@ The structure of the project is the same as the one of the previous example:
 The main difference is the addition of the :ref:`reference_config_files_profiles_tool_requires` section in the
 **conanfile.txt** file. In this section, we declare that we want to build our application
 using CMake **v3.22.6**.
+
+
+主要区别在于在 **conanfile.txt**  文件中添加了 :ref:`reference_config_files_profiles_tool_requires` 部分。在本节中，我们声明希望使用 **v3.22.6** 构建应用程序。
 
 .. code-block:: ini
     :caption: **conanfile.txt**
@@ -67,6 +77,9 @@ We also added a message to the *CMakeLists.txt* to output the CMake version:
 Now, as in the previous example, we will use Conan to install **Zlib** and **CMake
 3.22.6** and generate the files to find both of them. We will generate those
 files the folder *build*. To do that, just run:
+
+现在，与前面的示例一样，我们将使用 Conan 来安装 **Zlib** 和 **CMake 3.22.6**，
+并生成文件来查找它们。我们将生成  *build* 文件夹的那些文件。要做到这一点，只需运行:
 
 .. code-block:: bash
 
@@ -119,8 +132,15 @@ file called ``conanbuild.sh/bat``. This is the result of automatically invoking 
 **conanfile.txt**. This file sets some environment variables like a new ``PATH`` that
 we can use to inject to our environment the location of CMake v3.22.6.
 
+现在，如果你检查文件夹，你会看到Conan生成了一个名为 ``conanbuild.sh/bat``
+的新文件。这是在 **conanfile.txt** 中声明 ``tool_requires`` 时自动调用 
+``VirtualBuildEnv`` 生成器的结果。这个文件设置了一些环境变量，
+比如一个新的 ``PATH``，我们可以使用它将 CMake v3.22.6的位置注入到我们的环境中。
+
 Activate the virtual environment, and run ``cmake --version`` to check that you
 have installed the new CMake version in the path.
+
+激活虚拟环境，运行 ``cmake --version`` 以检查路径中是否安装了新的 CMake 版本。
 
 .. code-block:: bash
     :caption: Windows
@@ -147,6 +167,9 @@ Run ``cmake`` and check the version:
 As you can see, after activating the environment, the CMake v3.22.6 binary folder was
 added to the path and is the currently active version now. Now you can build your project as
 you previously did, but this time Conan will use CMake 3.22.6 to build it:
+
+如您所见，激活环境后，CMake v3.22.6二进制文件夹被添加到路径中，
+现在是当前活动版本。现在您可以像以前一样构建您的项目，但是这次 Conan 将使用 CMake 3.22.6 来构建它:
 
 .. code-block:: bash
     :caption: Windows
@@ -182,6 +205,9 @@ Note that when we activated the environment, a new file named
 ``deactivate_conanbuild.sh/bat`` was created in the same folder. If you source this file
 you can restore the environment as it was before.
 
+请注意，当我们激活环境时，会在同一个文件夹中创建的一个名为 ``deactivate_conanbuild.sh/bat`` 的新文件。
+如果您提供了这个文件的源代码，那么您可以恢复以前的环境。
+
 .. code-block:: bash
     :caption: Windows
     
@@ -210,6 +236,8 @@ the environment activation:
 
     ``tool_requires`` and tool packages are intended for executable applications, like ``cmake`` or ``ninja``. Do not
     use ``tool_requires`` to depend on library or library-like dependencies.
+
+    ``tool_requires`` 和 tool 包是为可执行应用程序(如  ``cmake``  或 ``ninja``)准备的。不要使用 ``tool_requires`` 来依赖于库或类似库的依赖项。
 
 
 Read more

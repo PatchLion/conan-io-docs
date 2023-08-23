@@ -6,14 +6,19 @@ Build a simple CMake project using Conan
 Let's get started with an example: We are going to create a string compressor application
 that uses one of the most popular C++ libraries: `Zlib <https://zlib.net/>`__.
 
+让我们从一个示例开始: 我们将创建一个字符串压缩器应用程序，它使用最流行的 C++ 库之一:  `Zlib <https://zlib.net/>`__。
+
 We'll use CMake as build system in this case but keep in mind that Conan **works with any
 build system** and is not limited to using CMake. You can check more examples with other
 build systems in the :ref:`Read More
 section<consuming_packages_read_more>`.
 
+在这种情况下，我们将使用 CMake 作为构建系统，但是请记住，Conan 可以使用 **任何构建系统**，并且不限于使用 CMake。您可以在  :ref:`Read More section<consuming_packages_read_more>` 中查看更多有关其他构建系统的示例。
 
 Please, first clone the sources to recreate this project, you can find them in the
 `examples2.0 repository <https://github.com/conan-io/examples2>`_ in GitHub:
+
+请首先克隆这些源代码来重新创建这个项目，您可以在 GitHub 的 `examples2.0 repository <https://github.com/conan-io/examples2>`_  中找到它们:
 
 .. code-block:: bash
 
@@ -22,6 +27,8 @@ Please, first clone the sources to recreate this project, you can find them in t
 
 
 We start from a very simple C language project with this structure:
+
+我们从一个非常简单的 C 语言项目开始，其结构如下:
 
 .. code-block:: text
 
@@ -32,6 +39,8 @@ We start from a very simple C language project with this structure:
 
 This project contains a basic *CMakeLists.txt* including the **zlib** dependency and the
 source code for the string compressor program in *main.c*.
+
+该项目包含一个基本的 *CMakeLists.txt*，其中包含 **zlib** 依赖项和 *main.c* 中字符串压缩程序的源代码。
 
 Let's have a look at the *main.c* file:
 
@@ -90,8 +99,15 @@ You can search there for libraries and also check the available versions. In our
 after checking the available versions for `Zlib <https://conan.io/center/zlib>`__ we
 choose to use the latest available version: **zlib/1.2.11**.
 
+
+我们的应用程序依赖于  **Zlib** 库。默认情况下，Conan尝试从名为 `ConanCenter <https://conan.io/center/>`_ 的远程服务器安装库。
+您可以在那里搜索库，也可以检查可用的版本。在我们的示例中，在检查了  `Zlib <https://conan.io/center/zlib>`__  的可用版本之后，
+我们选择使用最新的可用版本: **zlib/1.2.11**。
+
 The easiest way to install the **Zlib** library and find it from our project with Conan is
 using a *conanfile.txt* file. Let's create one with the following content:
+
+要安装  **Zlib** 库并在我们的 Conan 项目中找到它，最简单的方法是使用 *conanfile.txt* 文件。让我们创建一个包含以下内容的文件:
 
 .. code-block:: ini
     :caption: **conanfile.txt**
@@ -105,8 +121,12 @@ using a *conanfile.txt* file. Let's create one with the following content:
 
 As you can see we added two sections to this file with a syntax similar to an *INI* file.
 
+正如您所看到的，我们使用类似于 *INI* 文件的语法向该文件添加了两个部分。
+
     * **[requires]** section is where we declare the libraries we want to use in the
       project, in this case, **zlib/1.2.11**.
+
+      **[requires]** 部分是我们声明要在项目中使用的库，在本例中是 **zlib/1.2.11**。
 
     * **[generators]** section tells Conan to generate the files that the compilers or
       build systems will use to find the dependencies and build the project. In this case,
@@ -115,12 +135,22 @@ As you can see we added two sections to this file with a syntax similar to an *I
       :ref:`CMakeToolchain<conan_tools_cmaketoolchain>` to pass build information to *CMake*
       using a *CMake* toolchain file.
 
+      **[generators]** 部分告诉 Conan 生成编译器或构建系统查找依赖项并构建项目的文件。
+      在这种情况下，由于我们的项目基于 *CMake*，我们将使用 :ref:`CMakeDeps<conan_tools_cmakedeps>` 生成关于 **Zlib** 库文件安装位置的信息，
+      并 :ref:`CMakeToolchain<conan_tools_cmaketoolchain>`  使用 *CMake* 工具链文件将构建信息传递给 *CMake*。
+
+
 Besides the *conanfile.txt*, we need a **Conan profile** to build our project. Conan
 profiles allow users to define a configuration set for things like the compiler, build
 configuration, architecture, shared or static libraries, etc. Conan, by default, will
 not try to detect a profile automatically, so we need to create one. To let Conan try
 to guess the profile, based on the current operating system and installed tools, please
 run:
+
+除了 *conanfile.txt* 之外，我们还需要一个 **Conan profile** 文件来构建我们的项目。
+Conan profile 文件允许用户为编译器、构建配置、体系结构、共享或静态库等定义配置集。
+默认情况下，Conan 不会尝试自动检测配置文件，所以我们需要创建一个。
+要让 Conan 根据当前的操作系统和已安装的工具来猜测配置文件，请运行:
 
 .. code-block:: bash
 
@@ -131,6 +161,11 @@ the environment. It will also set the build configuration as *Release* by defaul
 generated profile will be stored in the Conan home folder with name *default* and will be
 used by Conan in all commands by default unless another profile is specified via the command
 line. An example of the output of this command for MacOS would be:
+
+这将根据环境检测操作系统、构建体系结构和编译器设置。默认情况下，它还会将构建配置设置为 *Release* 。
+所生成的配置文件将存储在 Conan 主文件夹中，文件名为 *default* ，默认情况下，
+Conan 将在所有命令中使用该配置文件，除非通过命令行指定另一个配置文件。
+这个命令在 MacOS 上的输出示例如下:
 
 .. code-block:: ini
 
@@ -155,6 +190,11 @@ line. An example of the output of this command for MacOS would be:
     C++ standard, you can edit the default profile file directly. First, get the location
     of the default profile using:
 
+    Conan 总是默认将的C++标准设置为被检测到的编译器版本的默认标准，
+    但使用 apple-clang 的 macOS 除外。在这种情况下，对于 apple-clang>=11，
+    它将设置 ``compiler.cppstd=gnu17``。如果您想使用不同的C++标准，
+    您可以直接编辑默认配置文件。首先，使用以下方法获取默认配置文件的位置:
+
     .. code-block:: bash
 
         $ conan profile path default
@@ -163,9 +203,14 @@ line. An example of the output of this command for MacOS would be:
     Then open and edit the file and set ``compiler.cppstd`` to the C++ standard you want
     to use.
 
+    然后打开并编辑这个文件，并将  ``compiler.cppstd`` 设置为您想要使用的C++标准。
+
 We will use Conan to install **Zlib** and generate the files that CMake needs to
 find this library and build our project. We will generate those files in the folder
 *build*. To do that, run:
+
+我们将使用 Conan 来安装 **Zlib** 并生成 CMake 需要的文件，以找到这个库并构建我们的项目。
+我们将在 *build* 文件夹生成中生成这些文件。要做到这一点，请运行:
 
 .. code-block:: bash
 
@@ -173,6 +218,8 @@ find this library and build our project. We will generate those files in the fol
 
 
 You will get something similar to this as the output of that command:
+
+您将得到与该命令的输出类似的结果:
 
 .. code-block:: bash
 
@@ -215,10 +262,16 @@ You will get something similar to this as the output of that command:
 
 As you can see in the output, there are a couple of things that happened:
 
+正如您在输出中看到的，发生了以下几件事:
+
     * Conan installed the *Zlib* library from the remote server we configured at the
       beginning of the tutorial. This server stores both the Conan recipes, which are the
       files that define how libraries must be built, and the binaries that can be reused so we
       don't have to build from sources every time.
+
+      Conan 从我们在本教程开头配置的远程服务器上安装了 *Zlib* 库。这个服务器既存储了 Conan recipes(方法)，
+      也存储了定义必须如何构建库的文件，还存储了可重用的二进制文件，这样我们就不必每次都从源代码构建。
+
     * Conan generated several files under the **build** folder. Those files
       were generated by both the ``CMakeToolchain`` and ``CMakeDeps`` generators we set in
       the **conanfile.txt**. ``CMakeDeps`` generates files so that CMake finds the Zlib
@@ -226,8 +279,15 @@ As you can see in the output, there are a couple of things that happened:
       toolchain file for CMake so that we can transparently build our project with CMake
       using the same settings that we detected for our default profile.
 
+      Conan 在 **build** 文件夹下生成了几个文件。这些文件是由我们在 **conanfile.txt** 中设置的 ``CMakeToolchain`` 
+      和 ``CMakeDeps`` 生成器生成的。 ``CMakeDeps`` 生成文件，以便 CMake 找到我们刚刚下载的 Zlib 库。
+      另一方面， ``CMakeToolchain`` 为 CMake 生成一个工具链文件，
+      这样我们就可以使用与默认配置文件相同的设置透明地使用 CMake 构建项目。
+      
 
 Now we are ready to build and run our **compressor** app:
+
+现在，我们已经准备好构建和运行我们的 **compressor** 应用程序:
 
 .. code-block:: bash
     :caption: Windows
