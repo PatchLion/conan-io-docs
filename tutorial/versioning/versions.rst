@@ -7,12 +7,18 @@ This section explains how different versions of a given package can be created, 
 manually changing the version attribute in the ``conanfile.py`` recipe, and then introducing the
 ``set_version()`` method as a mechanism to automate the definition of the package version.
 
+本节解释如何创建给定包的不同版本，首先手动更改 ``conanfile.py`` 配方中的 version 属性，
+然后引入 ``set_version()`` 方法作为自动定义包版本的机制。
+
 .. note::
 
     This section uses very simple, empty recipes without building any code, so without ``build()``,
     ``package()``, etc., to illustrate the versioning with the simplest possible recipes, and allowing
     the examples to run easily and to be very fast and simple. In real life, the recipes would be 
     full-blown recipes as seen in previous sections of the tutorial, building actual libraries and packages.
+
+    本节使用非常简单、空白的配方，没有构建任何代码，因此没有 ``build()``、 ``package()`` 等，用最简单的配方说明版本控制，
+    并允许示例轻松运行，非常快速和简单。在现实生活中，这些配方将是完全成熟的配方，如本教程前面的部分所示，构建实际的库和包。
 
 
 Let's start with a very simple recipe:
@@ -51,6 +57,9 @@ If we now did some changes to the source files of this library,
 this would be a new version, and we could change the ``conanfile.py`` version to ``version = "1.1"`` and
 create the new ``pkg/1.1`` version:
 
+如果我们现在对这个库的源文件做一些更改，这将是一个新版本，我们可以将 ``conanfile.py`` 版本更改为 
+``version = "1.1"`` 并创建新的 ``pkg/1.1`` 版本:
+
 .. code-block:: bash
 
     # Make sure you modified conanfile.py to version=1.1
@@ -68,14 +77,21 @@ create the new ``pkg/1.1`` version:
 As we can see, now we see in our cache both ``pkg/1.0`` and ``pkg/1.1``. The Conan cache can store
 any number of different versions and configurations for the same ``pkg`` package.
 
+正如我们所看到的，现在我们可以在缓存中看到 ``pkg/1.0`` 和 ``pkg/1.1``。
+Conan 缓存可以为同一 ``pkg`` 包存储任意数量的不同版本和配置。
+
 
 Automating versions
 -------------------
 
 Instead of manually changing the version in ``conanfile.py``, it is possible to automate it with 2 different approaches.
 
+不需要手动更改 ``conanfile.py`` 中的版本，可以使用两种不同的方法来自动化它。
+
 First it is possible to provide the ``version`` directly in the command line. In the example above, we could
 remove the ``version`` attribute from the recipe and do:
+
+首先，可以直接在命令行中提供 ``version``。在上面的示例中，我们可以从菜谱中删除 ``version`` 属性并执行以下操作:
 
 .. code-block:: bash
 
@@ -96,8 +112,12 @@ remove the ``version`` attribute from the recipe and do:
 The other possibility is to use the ``set_version()`` method to define the version dynamically, for example, if
 the version already exists in the source code or in a text file, or it should be deduced from the git version.
 
+另一种可能性是使用 ``set_version()`` 方法动态定义版本，例如，如果版本已经存在于源代码或文本文件中，或者应该从 git 版本推导出来。
+
 Let's assume that we have a ``version.txt`` file in the repo, that contains just the version string ``1.3``. 
 Then, this can be done:
+
+假设我们在repo中有一个 ``version.txt`` 文件，它只包含版本字符串 ``1.3``。然后，可以这样做:
 
 .. code-block:: python
     :caption: conanfile.py
@@ -132,6 +152,8 @@ Then, this can be done:
 It is also possible to combine the command line version definition, falling back to reading from file if the
 command line argument is not provided with the following syntax:
 
+还可以合并命令行版本定义，如果命令行参数没有提供以下语法，则返回到从文件读取:
+
 .. code-block:: python
     :caption: conanfile.py
 
@@ -158,6 +180,8 @@ command line argument is not provided with the following syntax:
         pkg/1.4
 
 Likewise, it is possible to obtain the version from a Git tag:
+
+同样，也可以从 Git 标记获得版本:
 
 .. code-block:: python
     :caption: conanfile.py
@@ -205,12 +229,18 @@ Likewise, it is possible to obtain the version from a Git tag:
       ``requires = "pkg/commit"`` in every other package recipe requiring this one, and it might be difficult to
       update consumers consistenly, and to know if a newer or older dependency is being used.
 
+      我们可以尝试使用类似于分支名称或提交的内容作为版本号。然而，这可能有一些缺点，例如，当需要这个包时，
+      需要在每个其他需要这个包的配方中显式地 ``requires = "pkg/commit"`` ，并且可能很难一致地更新消费者，
+      并且很难知道是否正在使用较新或较旧的依赖项。
+
 
 Requiring the new versions
 --------------------------
 
 When a new package version is created, if other package recipes requiring this one contain a explicit ``requires``,
 pinning the exact version like:
+
+当创建一个新的软件包版本时，如果需要这个版本的其他软件包配方包含明确的 ``requires``，则固定确切的版本，如:
 
 .. code-block:: python
     :caption: app/conanfile.py
@@ -224,6 +254,8 @@ pinning the exact version like:
 
 Then, installing or creating the ``app`` recipe will keep requiring and using the ``pkg/1.0`` version and not 
 the newer ones. To start using the new ``pkg`` versions, it is necessary to explicitly update the ``requires`` like:
+
+然后，安装或创建 ``app`` 配方将继续需要和使用 ``pkg/1.0`` 版本，而不是新的版本。要开始使用新的 pkg 版本，有必要像以下显式更新 ``requires``:
 
 .. code-block:: python
     :caption: app/conanfile.py
@@ -239,3 +271,6 @@ the newer ones. To start using the new ``pkg`` versions, it is necessary to expl
 This process, while it achieves very good reproducibility and traceability, can be a bit tedious if we are
 managing a large dependency graph and we want to move forward to use the latest dependencies versions faster 
 and with less manual intervention. To automate this, the *version-ranges* explained in the next section can be used.
+
+尽管这个过程可以实现很好的重复性和可跟踪性，但是如果我们管理一个大型的依赖关系图，并且希望更快地使用最新的依赖关系版本，
+并且减少人工干预，那么这个过程可能有点单调乏味。为了实现自动化，可以使用下一节中介绍的版本范围。

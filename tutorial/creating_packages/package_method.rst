@@ -8,10 +8,21 @@ step. In this tutorial, we will explain the use of the :ref:`CMake.install()
 <conan_tools_cmake_helper>` in more detail and also how to modify this method to do things
 like:
 
+我们已经在  `hello`  包中使用了 ``package()`` 方法来调用 CMake 的安装步骤。在本教程中，我们将更详细地解释 
+:ref:`CMake.install() <conan_tools_cmake_helper>` 的用法，以及如何修改这个方法来执行以下操作:
+
 - Using :ref:`conan.tools.files <conan_tools_files>` utilities to copy the generated
   artifacts from the build folder to the package folder
+
+  使用 :ref:`conan.tools.files <conan_tools_files>` 工具将生成的工件从 build 文件夹复制到 package 文件夹  
+
 - Copying package licenses
+  
+  复制包许可
+  
 - Manage how to package symlinks
+
+  管理如何打包符号链接
 
 Please, first clone the sources to recreate this project. You can find them in the
 `examples2.0 repository <https://github.com/conan-io/examples2>`_ on GitHub:
@@ -33,6 +44,13 @@ the ``CMAKE_INSTALL_PREFIX`` CMake variable to point to the recipe's :ref:`packa
 <conan_conanfile_properties_package_folder>` attribute. Then, just calling `install()` in
 the `CMakeLists.txt` over the created target is enough for Conan to move the built
 artifacts to the correct location in the Conan local cache.
+
+当您已经在 `CMakeLists.txt` 中定义了将构建和源文件夹中的工件(头、库、二进制文件)
+提取到预定位置并可能对这些工件进行一些后期处理的功能时，这是最简单的选择。
+这将在不改变 `CMakeLists.txt` 的情况下工作，因为 Conan 将设置 ``CMAKE_INSTALL_PREFIX`` CMake 
+变量以指向菜谱的 :ref:`package_folder <conan_conanfile_properties_package_folder>`
+属性。然后，只需在创建的目标上调用 `CMakeLists.txt` 中的 `install()` ，Conan 就可以将构建的构件移动到 
+Conan 本地缓存中的正确位置。
 
 .. code-block:: text
     :caption: *CMakeLists.txt*
@@ -60,6 +78,8 @@ artifacts to the correct location in the Conan local cache.
 Let's build our package again and pay attention to the lines regarding the
 packaging of files in the Conan local cache:
 
+让我们再次构建我们的软件包，并注意关于 Conan 本地缓存中的文件打包的行:
+
 .. code-block:: bash
     :emphasize-lines: 7-14
 
@@ -85,6 +105,7 @@ packaging of files in the Conan local cache:
 As you can see both the *include* and *library* files were copied to the package folder after
 calling to the ``cmake.install()`` method.
 
+正如您所看到的，在调用 ``cmake.install()`` 方法之后，*include* 和 *library* 文件都被复制到包文件夹中。
 
 Use conan.tools.files.copy() in the package() method and packaging licenses
 ---------------------------------------------------------------------------
@@ -96,10 +117,18 @@ use the :ref:`tools.files.copy <conan_tools_files_copy>` function to make that c
 can replace the previous ``cmake.install()`` step with a custom copy of the files and the
 result would be the same.
 
+对于您不想依赖 CMake 的安装功能或者您正在使用另一个构建系统的情况，Conan 提供了将所选文件复制到 
+:ref:`package_folder <conan_conanfile_properties_package_folder>` 的工具。在这种情况下，
+可以使用 :ref:`tools.files.copy <conan_tools_files_copy>` 函数进行复制。
+我们可以用文件的自定义副本替换前面的 ``cmake.install()`` 步骤，结果是相同的。
+
 Note that we are also packaging the ``LICENSE`` file from the library sources in the
 *licenses* folder. This is a common pattern in Conan packages and could also be added to
 the previous example using ``cmake.install()`` as the *CMakeLists.txt* will not copy this
 file to the *package folder*.
+
+注意，我们还将来自 *licenses* 文件夹中的库源的 ``LICENSE`` 文件打包。这是 Conan 包中的一种常见模式，
+也可以使用 ``cmake.install()`` 添加到前面的示例中，因为 *CMakeLists.txt* 不会将该文件复制到 *package folder* 中。
 
 .. code-block:: python
     :caption: *conanfile.py*
@@ -115,6 +144,8 @@ file to the *package folder*.
 
 Let's build our package one more time and pay attention to the lines regarding the
 packaging of files in the Conan local cache:
+
+让我们再次构建我们的软件包，并注意关于 Conan 本地缓存中的文件打包的行:
 
 .. code-block:: bash
     :emphasize-lines: 7-13
@@ -140,6 +171,8 @@ packaging of files in the Conan local cache:
 Check how the *include* and *library* files are packaged. The LICENSE file is also copied
 as we explained above.
 
+检查 *include* 和 *library* 文件是如何打包的。LICENSE文件也像我们以上解释的一样被复制。
+
 Managing symlinks in the package() method
 -----------------------------------------
 
@@ -148,11 +181,17 @@ won’t manipulate symlinks by default, so we provide several :ref:`tools
 <conan_tools_files_symlinks>` to convert absolute symlinks to relative ones and removing
 external or broken symlinks.
 
+在包方法中可以做的另一件事是管理如何包装符号链接。Conan 在默认情况下不会操作符号链接，
+所以我们提供了几个 :ref:`tools <conan_tools_files_symlinks>` 来将绝对符号链接转换为相对符号链接，
+并删除外部或中断符号链接。
+
 Imagine that some of the files packaged in the latest example were symlinks that point to
 an absolute location inside the Conan cache. Then, calling to
 ``conan.tools.files.symlinks.absolute_to_relative_symlinks()`` would convert those
 absolute links into relative paths and make the package relocatable.
 
+假设最新示例中打包的一些文件是指向 Conan 缓存中的绝对位置的符号链接。然后，调用 
+``conan.tools.files.symlinks.absolute_to_relative_symlinks()`` 会将这些绝对链接转换为相对路径，并使包可重定位。
 
 .. code-block:: python
     :caption: *conanfile.py*

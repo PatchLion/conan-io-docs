@@ -10,6 +10,11 @@ configure these settings and options in the case that one of them does not apply
 Conan package. We will introduce briefly how Conan models binary compatibility and how
 that relates to options and settings.
 
+我们已经解释了 :ref:`Conan settings and options<settings_and_options_difference>`，
+以及如何使用它们为不同配置(如 Debug、 Release、带有静态或共享库等)构建项目。
+在本节中，我们将解释如何在其中一个设置和选项不适用于 Conan 包的情况下配置这些设置和选项。
+我们将简要介绍 Conan 如何建立二进制兼容性模型，以及这与选项和设置的关系。
+
 Please, first clone the sources to recreate this project. You can find them in the
 `examples2.0 repository <https://github.com/conan-io/examples2>`_ on GitHub:
 
@@ -54,11 +59,16 @@ You can see that we added a :ref:`configure() method<reference_conanfile_methods
 objective of this method and how it's different from the ``config_options()`` method we
 already had defined in the recipe:
 
+您可以看到，我们在菜谱中添加了  :ref:`configure() method<reference_conanfile_methods_configure>` 。
+让我们解释一下这个方法的目标是什么，以及它与我们在配方中已经定义的  ``config_options()`` 方法有什么不同:
+
 * ``configure()``: use this method to configure which options or settings of the recipe
   are available. For example, in this case, we **delete the fPIC option**, because it
   should only be **True** if we are building the library as shared (in fact, some build
   systems will add this flag automatically when building a shared library).
 
+  使用此方法配置可用的配方选项或设置。例如，在本例中，我们 **删除了fPIC 选项**，
+  因为只有当我们以共享方式构建库时，它才应该是 **True** (事实上，一些构建系统在构建共享库时会自动添加这个标志)。
 
 * ``config_options()``: This method is used to **constraint** the available options in a
   package **before they take a value**. If a value is assigned to a setting or option that is
@@ -66,12 +76,21 @@ already had defined in the recipe:
   the fPIC option** in Windows because that option does not exist for that operating
   system. Note that this method is executed before the ``configure()`` method.
 
+  此方法用于在包中的可用选项 **接受值之前** **约束(constraint)** 它们。如果将值分配给此方法中删除的设置或选项，
+  Conan 将引发错误。在这种情况下，我们将 **删除Windows中的fPIC选项**，因为该操作系统不存在该选项。
+  注意，此方法在 ``configure()`` 方法之前执行。
+
 Be aware that deleting an option in the ``config_options()`` or in the ``configure()`` has
 not the same result. Deleting it in the ``config_options()`` **is like if we never declared
 it in the recipe** and it will raise an exception saying that the option does not exist.
 Nevertheless, if we delete it in the ``configure()`` method we can pass the option but it
 will have no effect. For example, if you try to pass a value to the ``fPIC`` option in
 Windows, Conan will raise an error warning that the option does not exist:
+
+请注意，删除 ``config_options()`` 或 ``configure()`` 中的选项不会得到相同的结果。在  ``config_options()`` 
+中删除它就 **像我们从未在配方中声明它一样**，它会引发一个异常，说明该选项不存在。
+尽管如此，如果我们在 ``configure()`` 方法中删除它，我们可以传递该选项，但是它不会有任何效果。
+例如，如果您尝试在 Windows 中向 ``fPIC`` 选项传递一个值，Conan 将发出一个错误警告，说明该选项不存在:
 
 .. code-block:: text
     :caption: Windows
@@ -89,6 +108,9 @@ implications of removing that option. It is related to how Conan identifies pack
 are binary compatible with the configuration set in the profile. In the next section, we
 introduce the concept of the **Conan package ID**.
 
+正如您所注意到的， ``configure()`` 和 ``config_options()`` 方法在某些条件满足时会 **删除一个选项**。
+让我们来解释一下我们为什么要这么做，以及移除这个选项的含义。它与 Conan 
+如何标识与配置文件中的配置集二进制兼容的包有关。在下一节中，我们将介绍 **Conan package ID** 的概念。
 
 .. _creating_packages_configure_options_settings:
 
@@ -101,8 +123,15 @@ build a new binary. Each of them is related to a **generated hash** called **the
 ID**. The package ID is just a way to convert a set of settings, options and information
 about the requirements of the package to a unique identifier. 
 
+在前面的示例中，我们使用了 Conan 来为不同的配置(如 *Debug* 和 *Release*)构建。
+每次为其中一个配置创建包时，Conan 都会构建一个新的二进制文件。
+它们中的每一个都与 **生成** 的称为 **the package ID** 的 **Hash** 相关。软件包 ID 
+只是一种将软件包的设置、选项和需求信息转换为唯一标识符的方法。
+
 Let's build our package for *Release* and *Debug* configurations and check
 the generated binaries package IDs.
+
+让我们构建用于发布和调试配置的包，并检查生成的二进制包 ID。
 
 .. code-block:: bash
     :emphasize-lines: 6,19,29,42
@@ -163,6 +192,9 @@ information about the requirements** (we will explain this later in the document
 **calculating a hash** with them. So, for example, in this case, they are the result of the
 information depicted in the diagram below.
 
+这两个包 ID 的计算方法是获取 **一组设置、选项和一些关于需求的信息**(我们将在文档的后面解释) ，
+并使用它们 **计算散列**。例如，在这个例子中，它们是下图中描述的信息的结果。
+
 .. image:: /images/conan-package_id.png
    :width: 680 px
    :align: center
@@ -170,17 +202,28 @@ information depicted in the diagram below.
 Those package IDs are different because the **build_type** is different. Now, when you want
 to install a package, Conan will:
 
+这些包 ID 是不同的，因为 **build_type** 是不同的:
+
 * Collect the settings and options applied, along with some information about the
   requirements and calculate the hash for the corresponding package ID.
+
+  收集应用的设置和选项，以及关于需求的一些信息，并计算相应包 ID 的散列。
 
 * If that package ID matches one of the packages stored in the local Conan cache Conan
   will use that. If not, and we have any Conan remote configured, it will search for a
   package with that package ID in the remotes.
 
+  如果该包 ID 与存储在本地 Conan 缓存中的一个包匹配，Conan 将使用该散列。如果没有，
+  并且我们配置了任何 Conan 远程，它将在远程中搜索包 ID。
+
 * If that calculated package ID does not exist in the local cache and remotes, Conan will
   fail with a "missing binary" error message, or will try to build that package from
   sources (this depends on the value of the ``--build`` argument). This build will
   generate a new package ID in the local cache.
+
+  如果计算出的包 ID 不存在于本地缓存和远程中，Conan 将失败，出现“丢失的二进制”错误消息，
+  或者尝试从源代码构建包(这取决于 ``--build`` 参数的值)。此构建将在本地缓存中生成一个新的包 ID。
+
 
 This steps are simplified, there is far more to package ID calculation than what we
 explain here, recipes themselves can even adjust their package ID calculations, we can
@@ -188,12 +231,20 @@ have different recipe and package revisions besides package IDs and there's also
 built-in mechanism in Conan that can be configured to declare that some packages with a
 certain package ID are compatible with other.
 
+这些步骤都被简化了，包 ID 的计算比我们在这里解释的要复杂得多，配方本身甚至可以调整它们的包 ID 计算，
+除了包 ID 之外，我们还可以有不同的菜谱和包修订版本，Conan 还有一个内置的机制，
+可以配置来声明一些具有某个包 ID 的包与其他包兼容。
+
 Maybe you have now the intuition of why we delete settings or options in Conan recipes.
 If you do that, those values will not be added to the computation of the package ID, so
 even if you define them, the resulting package ID will be the same. You can check this
 behaviour, for example with the fPIC option that is deleted when we build with the
 option ``shared=True``. Regardless of the value you pass for the fPIC option the generated
 package ID will be the same for the **hello/1.0** binary:
+
+也许你现在知道为什么我们删除Conan配方中的设置或选项的直觉了。如果这样做，这些值将不会添加到包 ID 的计算中，
+因此即使定义了它们，结果包 ID 也是相同的。您可以检查这种行为，例如使用 fPIC 选项，当我们使用 ``shared=True`` 选项构建时，
+该选项将被删除。不管为 fPIC 选项传递的值是什么，对于 **hello/1.0** 二进制文件，生成的包 ID 都是相同的:
 
 .. code-block:: bash
     
@@ -229,6 +280,10 @@ As you can see, the first run created the ``2a899fd0da3125064bf9328b8db681cd8289
 package, and the second one, regardless of the different value of the fPIC option, said we
 already had the ``2a899fd0da3125064bf9328b8db681cd82899d56`` package installed.
 
+正如您所看到的，第一次运行创建了 ``2a899fd0da3125064bf9328b8db681cd82899d56`` 包，
+第二次运行，不管 fPIC 选项的不同值如何，都表示我们已经安装了 
+``2a899fd0da3125064bf9328b8db681cd82899d56`` 包。
+
 C libraries
 ^^^^^^^^^^^
 
@@ -239,6 +294,11 @@ compiler C++ standard (``settings.compiler.cppstd``) or the standard library use
 does no make sense that they affect to the package ID computation, so a typical pattern is
 to delete them in the ``configure()`` method:
 
+还有其他一些典型的情况，需要删除某些设置。假设您正在打包一个 C 库。在构建这个库时，有一些设置，
+比如编译器C++ 准(``settings.compiler.cppstd``)或者使用的标准库(``self.settings.compiler.libcxx``) ，
+这些设置根本不会影响生成的二进制文件。那么它们对包 ID 计算的影响就没有意义了，
+因此典型的模式是在 ``configure()`` 方法中删除它们:
+
 .. code-block:: python
     
     def configure(self):
@@ -248,6 +308,9 @@ to delete them in the ``configure()`` method:
 Please, note that deleting these settings in the ``configure()`` method will modify the
 package ID calculation but will also affect how the toolchain, and the build system
 integrations work because the C++ settings do not exist.
+
+请注意，在 ``configure()`` 方法中删除这些设置将修改包 ID 计算，但也会影响工具链和构建系统集成的工作方式，
+因为C++设置不存在。
 
 Header-only libraries
 ^^^^^^^^^^^^^^^^^^^^^
@@ -261,6 +324,12 @@ generated package ID should not take into account settings, options or any infor
 from the requirement which is using the ``self.info.clear()`` method inside another recipe
 method called ``package_id()``:
 
+类似的情况也发生在:ref:`header-only libraries<creating_packages_other_header_only>`的包上。
+在这种情况下，我们不需要链接任何二进制代码，只需要将一些头文件添加到项目中。
+在这种情况下，Conan 包的包 ID 不应该受到设置或选项的影响。在这种情况下，
+有一种简单的方法可以声明生成的包 ID 不应该考虑设置、选项或来自需求的任何信息，
+这些信息正在另一个名为 ``package_id()`` 的配方方法中使用 ``self.info.clear()`` 方法:
+
 .. code-block:: python
     
     def package_id(self):
@@ -270,6 +339,9 @@ We will explain the ``package_id()`` method later and explain how you can custom
 way the package ID for the package is calculated. You can also check the :ref:`Conanfile's
 methods reference<reference_conanfile_methods>` if you want to know how this method works in
 more detail.
+
+稍后我们将解释 ``package_id()`` 方法，并解释如何自定义计算包的包 ID 的方式。
+如果希望更详细地了解此方法的工作原理，还可以检查 Conanfile 的方法引用。
 
 Read more
 ---------

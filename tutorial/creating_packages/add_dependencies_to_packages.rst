@@ -12,6 +12,13 @@ the :ref:`consuming packages section<consuming_packages_flexibility_of_conanfile
 will add some fancy colour output to our "Hello World" library using the `fmt 
 <https://conan.io/center/fmt>`__ library.
 
+在 :ref:`previous tutorial section<tutorial_creating_packages>` 中，我们为 “Hello World” 
+C++ 库创建了一个 Conan 包。我们使用了:ref:`conan.tools.scm.Git()<reference>` 。
+用于从 Git 存储库检索源代码的 Git ()工具。到目前为止，该软件包没有任何依赖于其他 Conan 软件包。
+让我们来解释一下如何以  :ref:`consuming packages section<consuming_packages_flexibility_of_conanfile_py>`
+非常相似的方式向包中添加依赖项。我们将使用 `fmt <https://conan.io/center/fmt>`__ 库向“Hello World”库
+添加一些花哨的颜色输出。
+
 Please, first clone the sources to recreate this project. You can find them in the
 `examples2.0 repository <https://github.com/conan-io/examples2>`_ on GitHub:
 
@@ -57,14 +64,26 @@ Let's check the relevant parts:
   did not have dependencies. ``CMakeDeps`` will generate all the config files CMake needs
   to find the ``fmt`` library.
 
+  首先，我们设置 ``generators`` 类属性，使 Conan 调用 :ref:`CMakeDeps<conan_tools_cmakedeps>`  
+  生成器。这在前面的配方中是不需要的，因为我们没有依赖关系。 ``CMakeDeps`` 将生成 CMake 查找 ``fmt`` 
+  库所需的所有配置文件。
+
 * Next, we use the :ref:`requires()<reference_conanfile_methods>` method to add the
   `fmt <https://conan.io/center/fmt>`__  dependency to our package.
+
+  接下来，我们使用 :ref:`requires()<reference_conanfile_methods>` 方法将 `fmt <https://conan.io/center/fmt>`__  
+  依赖项添加到包中。
 
 * Also, check that we added an extra line in the :ref:`source()<reference_conanfile_methods>`
   method. We use the `Git().checkout` method to checkout the source code in the
   `require_fmt <https://github.com/conan-io/libhello/tree/require_fmt>`__ branch. This
   branch contains the changes in the source code to add colours to the library messages,
   and also in the ``CMakeLists.txt`` to declare that we are using the ``fmt`` library.
+
+  另外，检查我们是否在  :ref:`source()<reference_conanfile_methods>` 方法中添加了额外的代码行。
+  我们使用 `Git().checkout` 方法检出 `require_fmt <https://github.com/conan-io/libhello/tree/require_fmt>`__ 
+  分支中的源代码。这个分支包含源代码中的更改，用于为库消息添加颜色，还包含 ``CMakeLists.txt`` 中的更改，
+  用于声明我们正在使用  ``fmt``  库。
 
 * Finally, note we added the :ref:`validate()<reference_conanfile_methods>` method to the
   recipe. We already used this method in the :ref:`consuming packages
@@ -74,11 +93,21 @@ Let's check the relevant parts:
   :ref:`check_max_cppstd()<conan_tools_build_check_max_cppstd>` to check that we are using at
   least C++11 and at most C++14 standards in our settings.
 
+  最后，请注意，我们在菜谱中添加了 :ref:`validate()<reference_conanfile_methods>` 方法。
+  我们已经在 :ref:`consuming packages  section<consuming_packages_flexibility_of_conanfile_py>`
+  中使用了这种方法来对不支持的配置产生错误。  在这里，我们调用 :ref:`check_min_cppstd()<conan_tools_build_check_min_cppstd>` 
+  和 :ref:`check_max_cppstd()<conan_tools_build_check_max_cppstd>` 来检查我们的设置中至少使用了 C++11
+  和最多使用了C++14标准。
+
 
 You can check the new sources, using the fmt library in the
 `require_fmt <https://github.com/conan-io/libhello/tree/require_fmt>`__. You will see that
 the `hello.cpp <https://github.com/conan-io/libhello/blob/require_fmt/src/hello.cpp>`__
 file adds colours to the output messages:
+
+您可以使用 `require_fmt <https://github.com/conan-io/libhello/tree/require_fmt>`__ 
+中的 fmt 库检查新的源代码。您将看到 `hello.cpp <https://github.com/conan-io/libhello/blob/require_fmt/src/hello.cpp>`__
+文件为输出消息添加了颜色:
 
 .. code-block:: cpp
 

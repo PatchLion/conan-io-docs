@@ -7,19 +7,34 @@ There are specific scenarios in which it is necessary to create packages from ex
 parties or binaries previously built by another process or team that is not using Conan. Under these circumstances,
 building from sources is not what you want.
 
+在一些特定的场景中，有必要从现有的二进制文件创建包，例如从第三方或以前由另一个不使用 
+Conan 的流程或团队构建的二进制文件创建包。在这种情况下，从源头构建不是您想要的。
+
 You can package the local files in the following scenarios:
+
+您可以在以下方案中打包本地文件:
 
  1. When you are developing your package locally and you want to quickly create a package with the built artifacts, but as you don't want to rebuild again (clean copy) your artifacts, you don't want to call
     :command:`conan create`. This method will keep your local project build if you are using an IDE.
+
+    当您在本地开发包时，您希望快速创建一个包，其中包含构建的构件，但是由于您不希望再次重新构建(清除副本)您的构件，因此不希望调用 :command:`conan create`。如果使用 IDE，此方法将保留本地项目生成。
+
  2. When you cannot build the packages from sources (when only pre-built binaries are available) and you have them
     in a local directory.
+
+    当您无法从源代码生成包(只有预生成的二进制文件可用)并且将它们放在本地目录中时。
+
  3. Same as 2 but you have the precompiled libraries in a remote repository.
+
+    与2相同，但是在远程存储库中有预编译的库。
 
 
 Locally building binaries
 -------------------------
 
 Use the :command:`conan new` command to create a "Hello World" C++ library example project:
+
+使用  :command:`conan new` 命令创建一个 "Hello World" C++ 库示例项目:
 
 .. code-block:: bash
 
@@ -47,18 +62,29 @@ This will create a Conan package project with the following structure.
 We have a ``CMakeLists.txt`` file in the root, an ``src`` folder with the ``cpp`` files and, an ``include``
 folder for the headers.
 
+我们在根目录中有一个 ``CMakeLists.txt`` 文件，一个包含 ``cpp`` 文件的 ``src`` 文件夹，以及一个用于头文件的 ``include`` 文件夹。
+
 They also have a ``test_package/`` folder to test that the exported package is working correctly.
+
+它们还有一个 ``test_package/`` 文件夹来测试导出的包是否正常工作。
 
 Now, for every different configuration (different compilers, architectures, build_type...):
 
+现在，对于每个不同的配置(不同的编译器、体系结构、 build_type...) :
+
 1. We call :command:`conan install` to generate the ``conan_toolchain.cmake`` file and the ``CMakeUserPresets.json``
    that can be used in our IDE or calling CMake (only >= 3.23).
+
+   我们调用 :command:`conan install` 来生成 ``conan_toolchain.cmake`` 文件和 ``CMakeUserPresets.json``，
+   它们可以在 IDE 中使用，也可以调用 CMake (仅 > = 3.23)。
 
    .. code-block:: bash
 
        $ conan install . -s build_type=Release
 
 2. We build our project calling CMake, our IDE, ... etc:
+
+   我们调用CMake、IDE、 ...等构建我们的项目:
 
    .. code-block:: bash
        :caption: Linux, macOS
@@ -83,7 +109,11 @@ Now, for every different configuration (different compilers, architectures, buil
          As we are directly using our IDE or CMake to build the library, the ``build()`` method of the recipe
          is never called and could be removed.
 
+         由于我们直接使用 IDE 或 CMake 来构建库，因此从不调用配方的 ``build()`` 方法，并且可以删除它。
+
 3. We call :command:`conan export-pkg` to package the built artifacts.
+
+   我们调用 :command:`conan export-pkg` 打包构建的工件。
 
    .. code-block:: bash
 
@@ -100,7 +130,11 @@ Now, for every different configuration (different compilers, architectures, buil
    Let's deep a bit more in the package method. The generated ``package()`` method is using ``cmake.install()`` to copy
    the artifacts from our local folders to the Conan package.
 
+   让我们深入了解一下包方法。生成的 ``package()`` 方法使用 ``cmake.install()`` 将工件从本地文件夹复制到 Conan 包。
+
    There is an alternative and generic ``package()`` method that could be used for any build system:
+
+   有一种可供任何构建系统使用的替代和通用 ``package()`` 方法:
 
    .. code-block:: python
 
@@ -114,11 +148,21 @@ Now, for every different configuration (different compilers, architectures, buil
    This  ``package()`` method is copying artifacts from the following directories that, thanks to the layout(), will always
    point to the correct places:
 
+   这个  ``package()`` 方法正在从以下目录中复制工件，这些工件由于 layout() 而总是指向正确的位置:
+
    - **os.path.join(self.source_folder, self.cpp.source.includedirs[0])** will always point to our local include folder.
+
+     **os.path.join(self.source_folder, self.cpp.source.includedirs[0])** 将始终指向我们的本地的include文件夹。
+
    - **os.path.join(self.build_folder, self.cpp.build.libdirs[0])** will always point to the location of the libraries when
      they are built, no matter if using a single-config CMake Generator or a multi-config one.
 
+     **os.path.join(self.build_folder, self.cpp.build.libdirs[0])** 将始终指向构建库时的位置，无论是使用单配置(single-config)的 
+     CMake生成器还是多配置(multi-config)的CMake生成器。
+
 4. We can test the built package calling :command:`conan test`:
+
+   我们可以测试构建的包，调用 :command:`conan test`:
 
    .. code-block:: bash
 
@@ -140,6 +184,7 @@ Now, for every different configuration (different compilers, architectures, buil
 Now you can try to generate a binary package for ``build_type=Debug`` running the same steps but changing the ``build_type``.
 You can repeat this process any number of times for different configurations.
 
+现在，您可以尝试为 ``build_type=Debug`` 生成一个二进制包，更改 ``build_type`` 运行相同的步骤。对于不同的配置，可以多次重复此过程。
 
 Packaging already Pre-built Binaries
 ------------------------------------
@@ -155,8 +200,12 @@ Please, first clone the sources to recreate this project. You can find them in t
 This is an example of scenario 2 explained in the introduction. If you have a local folder containing the binaries
 for different configurations you can package them using the following approach.
 
+这是引言中解释的场景2的一个示例。如果您有一个本地文件夹，其中包含用于不同配置的二进制文件，则可以使用以下方法对它们进行打包。
+
 
 These are the files of our example, (be aware that the library files are only empty files so not valid libraries):
+
+这些是我们示例中的文件(请注意，库文件只是空文件，因此不是有效的库) ：
 
 .. code-block:: text
 
@@ -194,6 +243,7 @@ These are the files of our example, (be aware that the library files are only em
 
 We have folders with ``os`` and subfolders with ``arch``. This the recipe of our example:
 
+我们有 ``os`` 文件夹和 ``arch`` 子文件夹。这是我们例子的配方：
 
 .. code-block:: python
 
@@ -228,20 +278,38 @@ We have folders with ``os`` and subfolders with ``arch``. This the recipe of our
 
 
 - We are not building anything, so the ``build`` method is not useful here.
+
+  我们没有构建任何东西，所以 ``build`` 方法在这里没有用处。
+
 - We can keep the same ``package`` method from the previous example because the location of the artifacts is
   declared by the ``layout()``.
+
+  我们可以从前面的示例中保留相同的 ``package`` 方法，因为构件的位置是由  ``layout()`` 声明的。
+
 - Both the source folder (with headers) and the build folder (with libraries) are in the same location, in a path that follows:
+
+  源文件夹(带标头文件)和生成文件夹(带库文件)位于同一位置，路径如下:
 
         ``vendor_hello_library/{os}/{arch}``
 
 - The headers are in the ``include`` subfolder of the ``self.source_folder`` (we declare it in ``self.cpp.source.includedirs``).
+
+  头文件位于 ``self.source_folder`` 的 ``include`` 子文件夹中(我们在 ``self.cpp.source.includedirs`` 中声明它)。
+
 - The libraries are in the root of the ``self.build_folder`` folder (we declare ``self.cpp.build.libdirs = ["."]``).
+
+  库文件位于 ``self.build_folder`` 文件夹的根目录中(我们声明 ``self.cpp.build.libdirs = ["."]``)。
+
 - We removed the ``compiler`` and the ``build_type`` because we only have different libraries depending on the operating
   system and the architecture (it might be a pure C library).
+
+  我们删除了 ``compiler`` 和 ``build_type``，因为我们只有依赖操作系统和体系结构的不同的库(可能是纯C库)。
 
 
 Now, for each different configuration we call :command:`conan export-pkg` command, later we can list the binaries
 so we can check we have one package for each precompiled library:
+
+现在，对每一种不同的配置调用 :command:`conan export-pkg` 命令，稍后我们可以列出二进制文件，这样我们就可以检查每个预编译库都有一个包:
 
     .. code-block:: bash
 
@@ -285,6 +353,7 @@ so we can check we have one package for each precompiled library:
 In this example, we don't have a ``test_package/`` folder but you can provide one to test the packages like in the
 previous example.
 
+在这个示例中，我们没有 test _ package/文件夹，但是您可以像前面的示例那样提供一个来测试包。
 
 Downloading and Packaging Pre-built Binaries
 --------------------------------------------
@@ -292,6 +361,9 @@ Downloading and Packaging Pre-built Binaries
 This is an example of scenario 3 explained in the introduction. If we are not building the libraries we likely
 have them somewhere in a remote repository. In this case, creating a complete Conan recipe, with the detailed
 retrieval of the binaries could be the preferred method, because it is reproducible, and the original binaries might be traced.
+
+这是引言中解释的场景3的一个示例。如果我们没有构建这些库，我们可能将它们放在远程存储库的某个地方。
+在这种情况下，创建一个完整的 Conan 配方，并详细检索二进制文件可能是首选的方法，因为它是可重复的，并且可以跟踪原始的二进制文件。
 
 Please, first clone the sources to recreate this project. You can find them in the
 `examples2.0 repository <https://github.com/conan-io/examples2>`_ on GitHub:
@@ -336,7 +408,11 @@ Please, first clone the sources to recreate this project. You can find them in t
 Typically, pre-compiled binaries come for different configurations, so the only task that the
 ``build()`` method has to implement is to map the ``settings`` to the different URLs.
 
+通常，预编译的二进制文件针对不同的配置，因此 ``build()`` 方法必须实现的唯一任务是将 ``settings`` 映射到不同的URL。
+
 We only need to call :command:`conan create` with different settings to generate the needed packages:
+
+我们只需要使用不同的设置调用 :command:`conan create` 来生成所需的包:
 
 
     .. code-block:: bash
@@ -381,9 +457,14 @@ We only need to call :command:`conan create` with different settings to generate
 It is recommended to include also a small consuming project in a ``test_package`` folder to verify the package is correctly
 built, and then upload it to a Conan remote with :command:`conan upload`.
 
+建议在 ``test_package`` 文件夹中包含一个小型消费项目，以验证包是否正确构建，然后通过  :command:`conan upload` 将其上传到 Conan 远程。
+
 The same building policies apply. Having a recipe fails if no Conan packages are
 created, and the :command:`--build` argument is not defined. A typical approach for this kind of
 package could be to define a :command:`build_policy="missing"`, especially if the URLs are also
 under the team's control. If they are external (on the internet), it could be better to create the
 packages and store them on your own Conan repository, so that the builds do not rely on third-party URLs
 being available.
+
+同样的构建策略也适用。如果没有创建 Conan 包，并且没有定义 :command:`--build` 参数，那么使用配方就会失败。这种包的典型方法是定义 :command:`build_policy="missing"`，
+特别是如果 URL 也在团队的控制之下。如果它们是外部的(在互联网上) ，那么最好创建包并将它们存储在您自己的 Conan 存储库中，这样构建就不会依赖于可用的第三方 URL。
