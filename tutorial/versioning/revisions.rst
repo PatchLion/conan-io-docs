@@ -298,8 +298,7 @@ By default, the package revision will also be resolved to the latest one. Howeve
 it is not possible to pin a package revision explicitly in recipes, recipes can 
 only require down to the recipe revision as we defined above.
 
-默认情况下，软件包修订版也将解析为最新版本。然而，这是不可能的别针一个包修订明确在配方，
-配方只能需要下降到我们上面定义的配方修订。
+默认情况下，包修订版也将解析为最新版本。但是，不可能在配方中明确地固定一个包修订，配方只能按照我们上面定义的配方修订。
 
 .. warning::
 
